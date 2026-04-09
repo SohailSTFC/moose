@@ -28,7 +28,7 @@ public:
 
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::Operator * createResidual() { return nullptr; }
-  virtual mfem::Operator * createJacobianI(const int& i) { return nullptr; }
+  virtual mfem::Operator * createJacobianI(const int& i [[maybe_unused]]) { return nullptr; }
 
   /// Get name of the test variable labelling the weak form this kernel is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }
@@ -36,8 +36,8 @@ public:
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// No default as these kernels have an arbitrary sized range
   virtual const int & getNumberOfTrialVars() const {return numTrialVarsExpected;}
-  virtual bool & isTrialSpaceActive() const {;}
-  virtual const VariableName & getTrialVariableName(const int& i) const { return _test_var_names[i]; }
+  virtual const bool & isTrialSpaceActive(const int& i) const {return _trial_var_names_active[i].second;}
+  virtual const VariableName & getTrialVariableName(const int& i) const { return _trial_var_names_active[i].first;}
 
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
