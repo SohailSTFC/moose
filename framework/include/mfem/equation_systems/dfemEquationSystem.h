@@ -6,7 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
+//*//
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
@@ -16,7 +16,7 @@
 #include "MFEMIntegratedBC.h"
 #include "MFEMEssentialBC.h"
 #include "MFEMContainers.h"
-#include "MFEMdFemKernel.h"
+#include "MFEMdfemKernel.h"
 
 namespace Moose::MFEM
 {
@@ -25,7 +25,7 @@ namespace Moose::MFEM
  * Class to store weak form components (bilinear and linear forms, and optionally
  * mixed and nonlinear forms) and build methods
  */
-
+template<typename dscalar_t, int dim = 2>
 class dfemEquationSystem : public EquationSystem
 {
 
@@ -33,7 +33,7 @@ private:
 
   // dFem kernels map, because they have variable numbers of trial
   // spaces dpenedant on the internal dFem kernal map
-  NamedFieldsMap<std::shared_ptr<MFEMdFemKernel>> _dfem_kernels;
+  NamedFieldsMap<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >> _dfem_kernels;
 
   // Residual and Jacobian maps of the kernels
   NamedFieldsMap<mfem::Array<std::shared_ptr<mfem::Operator>>> _dfem_residuals;
@@ -57,19 +57,19 @@ public:
   void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
   /// Add a dfem domain integrator
-  void AddDfemDomainKernel(std::shared_ptr<MFEMdFemKernel> kernel);
+  void AddDfemDomainKernel(std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> > kernel);
 
   /// Apply the Residual forms
   void ApplyDomainResidualIntegrators(
       const std::string & test_var_name,
       mfem::Array<std::shared_ptr<mfem::Operator>> form,
-      NamedFieldsMap<std::shared_ptr<MFEMdFemKernel>> _dfem_kernels);
+      NamedFieldsMap<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >> _dfem_kernels);
 
   /// Apply the Jacobian forms
   void ApplyDomainJacobianIntegrators(
       const std::string & test_var_name,
       NamedFieldsMap<mfem::Array<std::shared_ptr<mfem::Operator>>> form,
-      NamedFieldsMap<std::shared_ptr<MFEMdFemKernel>> _dfem_kernels);
+      NamedFieldsMap<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >> _dfem_kernels);
 
 }; //End of classname
 } //End of namespace
