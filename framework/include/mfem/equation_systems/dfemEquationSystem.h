@@ -33,15 +33,18 @@ private:
 
   // dFem kernels map, because they have variable numbers of trial
   // spaces dpenedant on the internal dFem kernal map
-  NamedFieldsMap<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >> _dfem_kernels;
+  NamedFieldsMap<std::vector<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >>> _dfem_kernels;
 
-  // Residual and Jacobian maps of the kernels
-  NamedFieldsMap<mfem::Array<std::shared_ptr<mfem::Operator>>> _dfem_residuals;
-  NamedFieldsMap<NamedFieldsMap<mfem::Array<std::shared_ptr<mfem::Operator>>>> _dfem_jacobians;
+  // Residual and Jacobian maps of the Operator forms
+  NamedFieldsMap<std::shared_ptr<mfem::future::DifferentiableOperator>> _dfem_residuals;
+  NamedFieldsMap<NamedFieldsMap<std::shared_ptr<mfem::future::DifferentiableOperator>>> _dfem_jacobians;
 
   /// Arrays to store essential BCs to act on each component of weak form.
   /// Named according to test variable.
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
+
+  /// Jacobian Operator Handle
+  mutable mfem::OperatorHandle _jacobian;
 
   /// Friend classes
   friend class dfemEquationSystemProblemOperator;
@@ -62,14 +65,20 @@ public:
   /// Apply the Residual forms
   void ApplyDomainResidualIntegrators(
       const std::string & test_var_name,
-      mfem::Array<std::shared_ptr<mfem::Operator>> form,
-      NamedFieldsMap<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >> _dfem_kernels);
+      std::shared_ptr<mfem::future::DifferentiableOperator> resForm,
+      NamedFieldsMap<std::vector<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >>> _dfem_kernels);
 
   /// Apply the Jacobian forms
   void ApplyDomainJacobianIntegrators(
       const std::string & test_var_name,
-      NamedFieldsMap<mfem::Array<std::shared_ptr<mfem::Operator>>> form,
-      NamedFieldsMap<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >> _dfem_kernels);
+      NamedFieldsMap<std::shared_ptr<mfem::future::DifferentiableOperator>> jacForm,
+      NamedFieldsMap<std::vector<std::shared_ptr<MFEMdfemKernel<dscalar_t,dim> >>> _dfem_kernels);
+
+  /// The Residual Mult
+  void Mult(const mfem::Vector& x, mfem::Vector& y) const override;
+
+  /// The Gradient of the Residual Operator (Jacobian)
+  mfem::Operator& GetGradient(const mfem::Vector& x) const override;
 
 }; //End of classname
 } //End of namespace
