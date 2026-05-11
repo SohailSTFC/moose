@@ -87,6 +87,32 @@
     symbol_names = kappa
     symbol_values = 3.1415926535
   []
+
+  [epsilon]
+    type = Constant
+    expression = '(1. + kappa * kappa) * sin(kappa * y)'
+
+    symbol_names = kappa
+    symbol_values = 3.1415926535
+  []
+
+  [kFunc]
+    type = ParsedFunction
+    expression = '(1. + kappa * kappa) * sin(kappa * y)'
+
+    symbol_names = kappa
+    symbol_values = 3.1415926535
+  []
+
+  [dkFunc_dB]
+    type = ParsedVectorFunction
+    expression_x = '(1. + kappa * kappa) * sin(kappa * y)'
+    expression_y = '(1. + kappa * kappa) * sin(kappa * z)'
+    expression_z = '(1. + kappa * kappa) * sin(kappa * x)'
+
+    symbol_names = kappa
+    symbol_values = 3.1415926535
+  []
 []
 
 [BCs]
@@ -98,13 +124,14 @@
 []
 
 [Kernels]
-  [curlcurl]
+  [nl_curlcurl]
     type = MFEMCurlCurlKernel
     variable = e_field
   []
   [mass]
     type = MFEMVectorFEMassKernel
     variable = e_field
+    coefficient = 1.0e-1
   []
   [source]
     type = MFEMVectorFEDomainLFKernel
@@ -130,10 +157,6 @@
   type = MFEMSteady
   device = cpu
   assembly_level = legacy
-  dt = 1e-2
-  start_time = 0.0
-  end_time = 0.5
-
   nl_max_its = 30
   nl_abs_tol = 1.0e-5
   nl_rel_tol = 1.0e-5
@@ -143,7 +166,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/CurlCurl
+    file_base = OutputData/nl_CurlCurl
     vtk_format = ASCII
   []
 []       
