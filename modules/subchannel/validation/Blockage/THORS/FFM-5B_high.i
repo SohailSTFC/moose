@@ -18,7 +18,7 @@ inlet_vel = 6.93 #m/sec, high flow case
 mass_flux_in = '${fparse rho *  inlet_vel}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = 50
@@ -48,7 +48,6 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -58,26 +57,24 @@ P_out = 2.0e5 # Pa
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = exponential
-  # friction model
   friction_closure = 'cheng'
+  full_output = true
+  mixing_closure = 'cheng_todreas'
+
 []
 
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
   []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
+    CT = 2.0
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMTriFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMTriWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMTriPowerIC
@@ -237,6 +234,6 @@ P_out = 2.0e5 # Pa
   [xfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S displacement w_perim'
+    variable = 'mdot SumWij P DP h T rho mu q_prime S w_perim'
   []
 []

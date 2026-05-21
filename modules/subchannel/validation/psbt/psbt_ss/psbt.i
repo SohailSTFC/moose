@@ -80,8 +80,6 @@ P_out = 14.72e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.08
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -91,9 +89,10 @@ P_out = 14.72e6 # Pa
   staggered_pressure = false
   verbose_subchannel = true
   interpolation_scheme = exponential
-  deformation = true # this flag allows the re-calculation of subchannel geometric parameters based on the dpin value
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
@@ -104,18 +103,15 @@ P_out = 14.72e6 # Pa
     type = SCMHTCDittusBoelter
     correction_factor = none
   []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.08
+    CT = 2.6
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMQuadPowerIC
@@ -130,11 +126,6 @@ P_out = 14.72e6 # Pa
     value = ${T_in}
   []
 
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 0.00950
-  []
 
   [P_ic]
     type = ConstantIC

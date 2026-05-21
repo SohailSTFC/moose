@@ -57,8 +57,6 @@ length = 0.5
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.08
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -68,6 +66,8 @@ length = 0.5
   segregated = false
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
@@ -76,6 +76,11 @@ length = 0.5
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
+  []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.08
+    CT = 2.6
   []
 []
 
@@ -114,15 +119,7 @@ length = 0.5
     axial_heat_rate = axial_heat_rate
   []
 
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [T_ic]
     type = ConstantIC
@@ -130,11 +127,6 @@ length = 0.5
     value = ${T_in}
   []
 
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 0.00950
-  []
 
   [P_ic]
     type = ConstantIC

@@ -5,7 +5,7 @@ rho_in = 10453.21705
 mass_flux_in = '${fparse 10*rho_in/3600/flow_area}'
 P_out = 1.0e5 # Pa
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = 50
@@ -33,8 +33,6 @@ P_out = 1.0e5 # Pa
   fp = LBE
   n_blocks = 1
   P_out = 1.0e5
-  CT = 1.0
-  # enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -42,27 +40,23 @@ P_out = 1.0e5 # Pa
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = upwind
-
-  # friction model
   friction_closure = 'cheng'
+
+  full_output = true
+  mixing_closure = 'Kim_and_Chung'
 []
 
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
   []
+  [Kim_and_Chung]
+    type = SCMMixingKimAndChung
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMTriFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMTriWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMTriPowerIC

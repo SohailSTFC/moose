@@ -34,28 +34,29 @@ n_cells = 20
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
-  CT = 2.0
   P_tol = 1e-6
   T_tol = 1e-6
+  full_output = true
   compute_density = true
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
   friction_closure = 'MATRA'
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
   []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 2.0
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
   [T_ic]
     type = ConstantIC
@@ -63,10 +64,6 @@ n_cells = 20
     value = ${T_in}
   []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMQuadPowerIC
@@ -81,11 +78,11 @@ n_cells = 20
     value = 0.0
   []
 
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
-  []
+  # [DP_ic]
+  #   type = ConstantIC
+  #   variable = DP
+  #   value = 0.0
+  # []
 
   [Viscosity_ic]
     type = ViscosityIC

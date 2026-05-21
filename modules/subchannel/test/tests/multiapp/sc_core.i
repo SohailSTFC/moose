@@ -26,7 +26,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = 10
@@ -42,7 +42,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = '${fparse n_rings}'
     n_cells = 10
     heated_length = '${fparse length_heated_fuel}'
@@ -132,7 +132,6 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   fp = sodium
   n_blocks = 1
   P_out = ${P_out}
-  CT = 1.0
   P_tol = 1.0e-2
   T_tol = 1.0e-2
 
@@ -152,6 +151,10 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   duct_HTC_closure = 'gnielinski'
   # Friction Correlation
   friction_closure = 'Cheng'
+  full_output = true
+  # Mixing Correlation
+  mixing_closure = 'Kim'
+
 []
 
 [SCMClosures]
@@ -161,18 +164,13 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   [gnielinski]
     type = SCMHTCGnielinski
   []
+  [Kim]
+    type = SCMMixingKimAndChung
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMTriFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMTriWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMTriPowerIC
@@ -187,11 +185,6 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
     value = ${T_in}
   []
 
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = ${fuel_pin_diameter}
-  []
 
   [P_ic]
     type = ConstantIC
@@ -248,7 +241,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMFlatMassFlowRateAux
@@ -256,7 +249,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
     boundary = inlet
     mass_flow = ${mass_flow}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
 []
 

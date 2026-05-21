@@ -11,7 +11,7 @@ P_out = 2.0e5 # Pa
 []
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     pin_diameter = 0.01
     dwire = 0.002
@@ -21,7 +21,7 @@ P_out = 2.0e5 # Pa
   []
   [duct]
     type = SCMTriDuctMeshGenerator
-    input = subchannel
+    input = sub_channel
   []
 []
 
@@ -36,7 +36,6 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 1.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -46,6 +45,7 @@ P_out = 2.0e5 # Pa
   segregated = false
   duct_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
+  mixing_closure = 'cheng_todreas'
 []
 
 [SCMClosures]
@@ -55,18 +55,13 @@ P_out = 2.0e5 # Pa
   [gnielinski]
     type = SCMHTCGnielinski
   []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMTriFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMTriWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMTriPowerIC
@@ -79,18 +74,6 @@ P_out = 2.0e5 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
-  []
-
-  [P_ic]
-    type = ConstantIC
-    variable = P
-    value = 0.0
-  []
-
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
   []
 
   [Viscosity_ic]
@@ -219,7 +202,7 @@ P_out = 2.0e5 # Pa
   [Total_power]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime
-    block = subchannel
+    block = sub_channel
   []
   [mdot-8]
     type = SubChannelPointValue

@@ -5,7 +5,7 @@ P_out = 2.0e5 # Pa
 length = 0.5
 num_cells = 40
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = ${num_cells}
@@ -21,7 +21,7 @@ num_cells = 40
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = 3
     n_cells = ${num_cells}
     heated_length = 0.5
@@ -57,7 +57,6 @@ num_cells = 40
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -65,10 +64,11 @@ num_cells = 40
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = upwind
-  # Heat Transfer Correlation
   pin_HTC_closure = 'gnielinski'
-  # friction model
   friction_closure = 'cheng'
+  full_output = true
+  mixing_closure = 'cheng_todreas'
+
 []
 
 [SCMClosures]
@@ -78,24 +78,15 @@ num_cells = 40
   [gnielinski]
     type = SCMHTCGnielinski
   []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
+    CT = 2.6
+  []
 []
 
 [ICs]
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 5.84e-3
-  []
 
-  [S_IC]
-    type = SCMTriFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMTriWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_ic]
     type = SCMTriPowerIC

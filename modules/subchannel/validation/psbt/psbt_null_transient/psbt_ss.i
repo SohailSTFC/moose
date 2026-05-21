@@ -31,34 +31,30 @@ P_out = 4.923e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
-  CT = 2.0
   P_tol = 1e-6
   T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  # friction model
   friction_closure = 'MATRA'
+  full_output = true
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
   []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 2.0
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMQuadPowerIC

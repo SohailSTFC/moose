@@ -2731,7 +2731,14 @@ FEProblemBase::getFunction(const std::string & name, const THREAD_ID tid)
 
     // Try once more
     if (!hasFunction(name, tid))
+    {
+      mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_function"),
+                  "getFunction() was called before Functions have been constructed. The requested "
+                  "Function '" +
+                      name + "' may exist in the input file, but Functions are not available yet.");
+
       mooseError("Unable to find function " + name);
+    }
   }
 
   auto * const ret = dynamic_cast<Function *>(_functions.getActiveObject(name, tid).get());
@@ -4107,7 +4114,14 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     parameters.set<SubProblem *>("_subproblem") = this;
   }
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  unsigned int n_threads = libMesh::n_threads();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (parameters.isKokkosObject())
+    n_threads = 1;
+#endif
+
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     // Create the general Block/Boundary MaterialBase object
     std::shared_ptr<MaterialBase> material =
@@ -4681,7 +4695,14 @@ FEProblemBase::getUserObjectBase(const std::string & name, const THREAD_ID tid /
       .condition<AttribName>(name)
       .queryInto(objs);
   if (objs.empty())
+  {
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_user_object"),
+                "A UserObject getter was called before UserObjects have been constructed. The "
+                "requested UserObject '" +
+                    name + "' may exist in the input file, but UserObjects are not available yet.");
+
     mooseError("Unable to find user object with name '" + name + "'");
+  }
   mooseAssert(objs.size() == 1, "Should only find one UO");
   return *(objs[0]);
 }
@@ -4862,7 +4883,16 @@ FEProblemBase::getVectorPostprocessorObjectByName(const std::string & object_nam
       .queryInto(objs);
 
   if (objs.empty())
+  {
+    mooseAssert(
+        getMooseApp().actionWarehouse().isTaskComplete("add_vector_postprocessor"),
+        "A VectorPostprocessor getter was called before VectorPostprocessors have been "
+        "constructed. The requested VectorPostprocessor '" +
+            object_name +
+            "' may exist in the input file, but VectorPostprocessors are not available yet.");
+
     mooseError("Unable to find VectorPostprocessor with name '", object_name, "'");
+  }
   mooseAssert(objs.size() == 1,
               "We shouldn't find more than one vector postprocessor object for a given name");
   return *(objs[0]);
@@ -5044,13 +5074,7 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
         exec_type == EXEC_SUBDOMAIN || exec_type == EXEC_NONLINEAR || exec_type == EXEC_LINEAR))
     customSetup(exec_type);
 
-  // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
-  // construction makes the first Sampler::execute() call. This ensures that the random number
-  // generator object is the correct state prior to any other object (e.g., Transfers) attempts to
-  // extract data from the Sampler. That is, if the Sampler::execute() call is delayed to here
-  // then it is not in the correct state for other objects.
-  if (exec_type != EXEC_INITIAL)
-    executeSamplers(exec_type);
+  executeSamplers(exec_type);
 
   // Pre-aux UserObjects
   computeUserObjects(exec_type, Moose::PRE_AUX);
@@ -9381,32 +9405,16 @@ FEProblemBase::addOutput(const std::string & object_type,
   // Add a pointer to the FEProblemBase class
   parameters.addPrivateParam<FEProblemBase *>("_fe_problem_base", this);
 
-  // Create common parameter exclude list
-  std::vector<std::string> exclude;
-  if (object_type == "Console")
-  {
-    exclude.push_back("execute_on");
+  // --show-input should enable the display of the input file on the screen
+  if (object_type == "Console" && _app.getParam<bool>("show_input") &&
+      parameters.get<bool>("output_screen"))
+    parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
 
-    // --show-input should enable the display of the input file on the screen
-    if (_app.getParam<bool>("show_input") && parameters.get<bool>("output_screen"))
-      parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
-  }
-  // Need this because Checkpoint::validParams changes the default value of
-  // execute_on
-  else if (object_type == "Checkpoint")
-    exclude.push_back("execute_on");
-
-  // Apply the common parameters loaded with Outputs input syntax
+  // Apply only user-set parameters from the common [Outputs] block so that
+  // each output type's own defaults are not overridden by common defaults.
   const InputParameters * common = output_warehouse.getCommonParameters();
   if (common)
-    parameters.applyParameters(*common, exclude);
-  if (common && std::find(exclude.begin(), exclude.end(), "execute_on") != exclude.end() &&
-      common->isParamSetByUser("execute_on") && object_type != "Console")
-    mooseInfoRepeated(
-        "'execute_on' parameter specified in [Outputs] block is ignored for object '" +
-        object_name +
-        "'.\nDefine this object in its own sub-block of [Outputs] to modify its "
-        "execution schedule.");
+    parameters.applyCommonUserSetParameters(*common);
 
   // Set the correct value for the binary flag for XDA/XDR output
   if (object_type == "XDR")

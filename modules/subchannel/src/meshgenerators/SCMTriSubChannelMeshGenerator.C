@@ -14,10 +14,6 @@
 #include "libmesh/unstructured_mesh.h"
 
 registerMooseObject("SubChannelApp", SCMTriSubChannelMeshGenerator);
-registerMooseObjectRenamed("SubChannelApp",
-                           TriSubChannelMeshGenerator,
-                           "06/30/2025 24:00",
-                           SCMTriSubChannelMeshGenerator);
 
 InputParameters
 SCMTriSubChannelMeshGenerator::validParams()
@@ -848,6 +844,7 @@ SCMTriSubChannelMeshGenerator::generate()
   sch_mesh._gap_pairs_sf = _gap_pairs_sf;
   sch_mesh._chan_pairs_sf = _chan_pairs_sf;
   sch_mesh._pin_to_chan_map = _pin_to_chan_map;
+  sch_mesh.computeAssemblyHydraulicParameters();
 
   return mesh_base;
 }

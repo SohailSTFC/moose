@@ -39,8 +39,6 @@ pin_diameter = 0.00950
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -50,6 +48,8 @@ pin_diameter = 0.00950
   segregated = true
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
@@ -59,18 +59,15 @@ pin_diameter = 0.00950
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
   []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 2.6
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMQuadPowerIC
@@ -86,11 +83,6 @@ pin_diameter = 0.00950
     value = ${T_in}
   []
 
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = ${pin_diameter}
-  []
 
   [P_ic]
     type = ConstantIC

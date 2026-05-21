@@ -13,10 +13,6 @@
 #include <numeric>
 
 registerMooseObject("SubChannelApp", SCMQuadSubChannelMeshGenerator);
-registerMooseObjectRenamed("SubChannelApp",
-                           QuadSubChannelMeshGenerator,
-                           "06/30/2025 24:00",
-                           SCMQuadSubChannelMeshGenerator);
 
 InputParameters
 SCMQuadSubChannelMeshGenerator::validParams()
@@ -484,6 +480,7 @@ SCMQuadSubChannelMeshGenerator::generate()
   sch_mesh._gij_map = _gij_map;
   sch_mesh._subchannel_position = _subchannel_position;
   sch_mesh._subch_type = _subch_type;
+  sch_mesh.computeAssemblyHydraulicParameters();
 
   return mesh_base;
 }

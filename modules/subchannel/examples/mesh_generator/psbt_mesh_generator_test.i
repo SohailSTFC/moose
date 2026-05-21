@@ -28,48 +28,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[AuxVariables]
-  [mdot]
-    block = sub_channel
-  []
-  [SumWij]
-    block = sub_channel
-  []
-  [P]
-    block = sub_channel
-  []
-  [DP]
-    block = sub_channel
-  []
-  [h]
-    block = sub_channel
-  []
-  [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
-  [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
-  []
-  [S]
-    block = sub_channel
-  []
-  [w_perim]
-    block = sub_channel
-  []
-  [q_prime]
-    block = sub_channel
-  []
-[]
-
 [FluidProperties]
   [water]
     type = Water97FluidProperties
@@ -80,8 +38,6 @@ P_out = 4.923e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.08
-  CT = 2.6
   P_tol = 1e-6
   T_tol = 1e-6
   compute_density = true
@@ -90,6 +46,7 @@ P_out = 4.923e6 # Pa
   P_out = ${P_out}
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
@@ -99,18 +56,15 @@ P_out = 4.923e6 # Pa
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
   []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.08
+    CT = 2.6
+  []
 []
 
 [ICs]
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMQuadPowerIC
@@ -131,21 +85,10 @@ P_out = 4.923e6 # Pa
     value = 0.0
   []
 
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 0.00950
-  []
 
   [P_ic]
     type = ConstantIC
     variable = P
-    value = 0.0
-  []
-
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
     value = 0.0
   []
 
